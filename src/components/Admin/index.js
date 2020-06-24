@@ -1,9 +1,6 @@
-import React from 'react';
+import React, { Component } from 'react';
+
 import { withFirebase } from '../Firebase';
-
-import * as ROLES from '../../constants/roles';
-
-
 
 class AdminPage extends Component {
   constructor(props) {
@@ -11,7 +8,7 @@ class AdminPage extends Component {
 
     this.state = {
       loading: false,
-      users: {},
+      users: [],
     };
   }
 
@@ -19,8 +16,15 @@ class AdminPage extends Component {
     this.setState({ loading: true });
 
     this.props.firebase.users().on('value', snapshot => {
+      const usersObject = snapshot.val();
+
+      const usersList = Object.keys(usersObject).map(key => ({
+        ...usersObject[key],
+        uid: key,
+      }));
+
       this.setState({
-        users: snapshot.val(),
+        users: usersList,
         loading: false,
       });
     });
@@ -32,7 +36,6 @@ class AdminPage extends Component {
 
   render() {
     const { users, loading } = this.state;
-
 
     return (
       <div>
@@ -63,8 +66,5 @@ const UserList = ({ users }) => (
     ))}
   </ul>
 );
-
-const condition = authUser =>
-  authUser && authUser.roles.includes(ROLES.ADMIN);
 
 export default withFirebase(AdminPage);
